@@ -994,6 +994,28 @@ describe('standard-version', function () {
           fs.readFileSync('VERSION_TRACKER.txt', 'utf-8').should.equal('6.4.0')
         })
     })
+
+    it('`packageFiles` are bumped along with `bumpFiles` defaults [standard-version#533]', function () {
+      fs.writeFileSync('.gitignore', '', 'utf-8')
+      fs.mkdirSync('./dist')
+      fs.copyFileSync('../test/mocks/manifest-6.3.1.json', './dist/manifest.json')
+      writePackageLockJson('1.0.0')
+      commit('feat: yet another commit')
+      return require('./index')({
+        silent: true,
+        packageFiles: [
+          {
+            filename: './dist/manifest.json',
+            type: 'json'
+          }
+        ]
+      })
+        .then(() => {
+          JSON.parse(fs.readFileSync('./dist/manifest.json', 'utf-8')).version.should.equal('6.4.0')
+          JSON.parse(fs.readFileSync('package.json', 'utf-8')).version.should.equal('6.4.0')
+          JSON.parse(fs.readFileSync('package-lock.json', 'utf-8')).version.should.equal('6.4.0')
+        })
+    })
   })
 
   describe('npm-shrinkwrap.json support', function () {
